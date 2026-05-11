@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Dashboard</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        /* page layout */
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* sidebar */
+        .sidebar {
+            width: 250px;
+            background: #1a1a2e;
+            color: white;
+            padding: 30px 20px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 35px;
+            font-size: 28px;
+            color: #ff6b35;
+        }
+
+        .sidebar h3 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 22px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            padding: 14px 15px;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 15px;
+        }
+
+        .sidebar ul li:hover {
+            background: #ff6b35;
+            transform: translateX(5px);
+        }
+
+        /* content */
+        .content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        /* top bar */
+        .topbar {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .topbar h1 {
+            font-size: 28px;
+            color: #1a1a2e;
+        }
+
+        .topbar p {
+            color: gray;
+            margin-top: 5px;
+        }
+
+        .driver-box {
+            background: #ff6b35;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        /* stats cards */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #ff6b35;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #444;
+        }
+
+        .card p {
+            font-size: 30px;
+            font-weight: bold;
+            color: #1a1a2e;
+        }
+
+        /* trips table */
+        .table-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-section h2 {
+            margin-bottom: 20px;
+            color: #1a1a2e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th {
+            background: #1a1a2e;
+            color: white;
+            padding: 14px;
+            text-align: left;
+        }
+
+        table td {
+            padding: 14px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tr:hover {
+            background: #f5f5f5;
+        }
+
+        /* status tags */
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .active    { background: green; }
+        .pending   { background: orange; }
+        .completed { background: #007bff; }
+
+        /* mobile */
+        @media (max-width: 768px) {
+            .dashboard { flex-direction: column; }
+            .sidebar { width: 100%; }
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<?php include '../includes/header.php'; ?>
+
+<div class="dashboard">
+
+    <!-- sidebar -->
+    <div class="sidebar">
+        <h2>VAHAK</h2>
+        <h3>Driver Panel</h3>
+        <ul>
+            <li>🏠 Home</li>
+            <li>📦 Available Loads</li>
+            <li>🚚 My Trips</li>
+            <li>💰 Earnings</li>
+            <li>🚛 Vehicle Details</li>
+            <li>🗺️ Route Information</li>
+            <li>⭐ Ratings</li>
+            <li>👤 Profile</li>
+        </ul>
+    </div>
+
+    <!-- main area -->
+    <div class="content">
+
+        <!-- welcome topbar -->
+        <div class="topbar">
+            <div>
+                <h1>Welcome Driver 👋</h1>
+                <p>Manage your trips, earnings and deliveries easily.</p>
+            </div>
+            <div class="driver-box">Driver ID : D2045</div>
+        </div>
+
+        <!-- quick stats -->
+        <div class="cards">
+            <div class="card">
+                <h2>Total Trips</h2>
+                <p>48</p>
+            </div>
+            <div class="card">
+                <h2>Active Deliveries</h2>
+                <p>6</p>
+            </div>
+            <div class="card">
+                <h2>Total Earnings</h2>
+                <p>₹78K</p>
+            </div>
+            <div class="card">
+                <h2>Ratings</h2>
+                <p>4.8 ★</p>
+            </div>
+        </div>
+
+        <!-- recent trips -->
+        <div class="table-section">
+            <h2>Recent Trips</h2>
+
+            <table>
+                <tr>
+                    <th>Trip ID</th>
+                    <th>Vehicle</th>
+                    <th>Destination</th>
+                    <th>Status</th>
+                </tr>
+                <tr>
+                    <td>#501</td>
+                    <td>Tata Truck</td>
+                    <td>Mumbai</td>
+                    <td><span class="status active">Active</span></td>
+                </tr>
+                <tr>
+                    <td>#502</td>
+                    <td>Ashok Leyland</td>
+                    <td>Delhi</td>
+                    <td><span class="status pending">Pending</span></td>
+                </tr>
+                <tr>
+                    <td>#503</td>
+                    <td>Eicher</td>
+                    <td>Kolkata</td>
+                    <td><span class="status completed">Completed</span></td>
+                </tr>
+                <tr>
+                    <td>#504</td>
+                    <td>BharatBenz</td>
+                    <td>Chennai</td>
+                    <td><span class="status active">Active</span></td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
