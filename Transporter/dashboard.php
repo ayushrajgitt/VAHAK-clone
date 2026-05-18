@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // check correct role
-if ($_SESSION['role'] != 'customer') {
+if ($_SESSION['role'] != 'transporter') {
 
     header("Location: ../login.php");
     exit();
@@ -27,7 +27,7 @@ if ($_SESSION['role'] != 'customer') {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Dashboard</title>
+    <title>Transporter Dashboard</title>
 
     <link rel="stylesheet" href="../css/style.css">
 
@@ -227,16 +227,16 @@ if ($_SESSION['role'] != 'customer') {
     <!-- sidebar -->
     <div class="sidebar">
         <h2>VAHAK</h2>
-        <h3>Customer Panel</h3>
+        <h3>Transporter Panel</h3>
         <ul>
-            <li>🏠 Home</li>
-            <li>📦 Book Load</li>
-            <li>🚚 Track Shipment</li>
-            <li>📋 My Orders</li>
-            <li>💳 Payment History</li>
-            <li>🔔 Notifications</li>
-            <li>📞 Support</li>
-            <li>👤 Profile</li>
+            <li>🏠 Dashboard</li>
+            <li>🚚 Manage Fleet</li>
+            <li>👨‍✈️ Drivers</li>
+            <li>📦 Active Shipments</li>
+            <li>📍 Route Tracking</li>
+            <li>💰 Revenue</li>
+            <li>📊 Reports</li>
+            <li>👤 Company Profile</li>
         </ul>
     </div>
 
@@ -246,35 +246,35 @@ if ($_SESSION['role'] != 'customer') {
         <!-- welcome bar -->
         <div class="topbar">
             <div>
-                <h1>Welcome Customer 👋</h1>
-                <p>Manage your shipments and orders easily.</p>
+                <h1>Welcome Transporter 👋</h1>
+                <p>Manage vehicles, drivers and shipment operations.</p>
             </div>
-            <div class="profile-box">Customer ID : C1025</div>
+            <div class="profile-box">Transporter ID : T1001</div>
         </div>
 
         <!-- stats cards -->
         <div class="cards">
             <div class="card">
-                <h2>Total Orders</h2>
+                <h2>Total Vehicles</h2>
                 <p>25</p>
             </div>
             <div class="card">
-                <h2>Active Shipments</h2>
+                <h2>Active Drivers</h2>
                 <p>5</p>
             </div>
             <div class="card">
-                <h2>Completed Deliveries</h2>
+                <h2>Running Shipments</h2>
                 <p>20</p>
             </div>
             <div class="card">
-                <h2>Total Payments</h2>
+                <h2>Monthly Revenue</h2>
                 <p>₹45K</p>
             </div>
         </div>
 
         <!-- recent orders -->
         <div class="table-section">
-            <h2>Recent Orders</h2>
+            <h2>Active Fleet Operations</h2>
 
             <table>
                 <tr>

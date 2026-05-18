@@ -824,7 +824,7 @@
       <div class="login-card">
 
         <h3>Sign In to Portal</h3>
-        <p>Access your dashboard — customers, drivers & admins</p>
+        <p>Access your dashboard — customers, drivers, transporters & admins</p>
 
         <!-- role picker -->
         <div class="role-row">
@@ -842,6 +842,14 @@
               <path d="M1 14h22M7 20v2M17 20v2M5 10V7a2 2 0 0 1 2-2h6l4 5"/>
             </svg>
             Driver
+          </button>
+
+          <button type="button" class="role-btn" data-role="transporter">
+            <svg viewBox="0 0 24 24">
+              <rect x="1" y="10" width="22" height="10" rx="2"/>
+              <path d="M1 14h22M7 20v2M17 20v2M5 10V7a2 2 0 0 1 2-2h6l4 5"/>
+            </svg>
+            Transporter
           </button>
 
           <button type="button" class="role-btn" data-role="admin">
