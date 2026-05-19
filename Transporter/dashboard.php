@@ -20,6 +20,37 @@ if ($_SESSION['role'] != 'transporter') {
 
 ?>
 
+<?php
+
+include '../Includes/db.php';
+
+// fetch pending shipments
+
+$query = "
+
+SELECT
+shipments.*,
+users.full_name,
+trucks.truck_name
+
+FROM shipments
+
+JOIN users
+ON shipments.customer_id = users.id
+
+JOIN trucks
+ON shipments.truck_id = trucks.id
+
+WHERE shipment_status = 'pending'
+
+ORDER BY shipments.id DESC
+
+";
+
+$result = mysqli_query($conn, $query);
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -264,7 +295,27 @@ if ($_SESSION['role'] != 'transporter') {
             </div>
             <div class="card">
                 <h2>Running Shipments</h2>
-                <p>20</p>
+                <p>
+
+<?php
+
+$countQuery = "
+
+SELECT COUNT(*) AS total
+FROM shipments
+WHERE shipment_status = 'pending'
+
+";
+
+$countResult = mysqli_query($conn, $countQuery);
+
+$countData = mysqli_fetch_assoc($countResult);
+
+echo $countData['total'];
+
+?>
+
+</p>
             </div>
             <div class="card">
                 <h2>Monthly Revenue</h2>
@@ -282,31 +333,58 @@ if ($_SESSION['role'] != 'transporter') {
                     <th>Truck</th>
                     <th>Destination</th>
                     <th>Status</th>
+                    <th>Action</th>
                 </tr>
-                <tr>
-                    <td>#1021</td>
-                    <td>Tata Truck</td>
-                    <td>Mumbai</td>
-                    <td><span class="status active">Active</span></td>
-                </tr>
-                <tr>
-                    <td>#1022</td>
-                    <td>Ashok Leyland</td>
-                    <td>Delhi</td>
-                    <td><span class="status pending">Pending</span></td>
-                </tr>
-                <tr>
-                    <td>#1023</td>
-                    <td>Eicher</td>
-                    <td>Kolkata</td>
-                    <td><span class="status completed">Completed</span></td>
-                </tr>
-                <tr>
-                    <td>#1024</td>
-                    <td>BharatBenz</td>
-                    <td>Chennai</td>
-                    <td><span class="status active">Active</span></td>
-                </tr>
+
+                <?php while($shipment = mysqli_fetch_assoc($result)) { ?>
+
+                    <tr>
+
+                    <td>
+                    #<?php echo $shipment['id']; ?>
+                    </td>
+
+                    <td>
+                    <?php echo $shipment['truck_name']; ?>
+                    </td>
+
+                    <td>
+                    <?php echo $shipment['destination']; ?>
+                    </td>
+
+                    <td>
+
+                    <span class="status pending">
+
+                    <?php echo ucfirst($shipment['shipment_status']); ?>
+
+                    </span>
+
+                    </td>
+
+                    <td>
+
+                    <a
+                    href="accept_shipment.php?id=<?php echo $shipment['id']; ?>"
+                    style="
+                    background:#ff6b35;
+                    color:white;
+                    padding:8px 14px;
+                    border-radius:6px;
+                    text-decoration:none;
+                    font-weight:bold;
+                    "
+                    >
+
+                    Accept
+
+                    </a>
+
+                    </td>
+
+                    </tr>
+
+                <?php } ?>
             </table>
         </div>
 

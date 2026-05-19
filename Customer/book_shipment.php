@@ -307,9 +307,8 @@ const truckSelect = document.getElementById('truckSelect');
 
 const truckCard = document.getElementById('truckCard');
 
-const numberOfTrucksInput = document.querySelector(
-'input[name="number_of_trucks"]'
-);
+const numberOfTrucksInput =
+document.getElementById('numberOfTrucks');
 
 function updateTruckDetails() {
 
