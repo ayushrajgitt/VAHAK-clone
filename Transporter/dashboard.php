@@ -24,6 +24,17 @@ if ($_SESSION['role'] != 'transporter') {
 
 include '../Includes/db.php';
 
+// fetch drivers
+
+$driverQuery = "
+
+SELECT * FROM users
+WHERE role = 'driver'
+
+";
+
+$driverResult = mysqli_query($conn, $driverQuery);
+
 // fetch pending shipments
 
 $query = "
@@ -280,8 +291,9 @@ $result = mysqli_query($conn, $query);
                 <h1>Welcome Transporter 👋</h1>
                 <p>Manage vehicles, drivers and shipment operations.</p>
             </div>
-            <div class="profile-box">Transporter ID : T1001</div>
-        </div>
+            <div class="profile-box">Transporter ID :
+                T<?php echo 1000 + $_SESSION['user_id']; ?></div>
+            </div>
 
         <!-- stats cards -->
         <div class="cards">
@@ -297,25 +309,25 @@ $result = mysqli_query($conn, $query);
                 <h2>Running Shipments</h2>
                 <p>
 
-<?php
+            <?php
 
-$countQuery = "
+            $countQuery = "
 
-SELECT COUNT(*) AS total
-FROM shipments
-WHERE shipment_status = 'pending'
+            SELECT COUNT(*) AS total
+            FROM shipments
+            WHERE shipment_status = 'pending'
 
-";
+            ";
 
-$countResult = mysqli_query($conn, $countQuery);
+            $countResult = mysqli_query($conn, $countQuery);
 
-$countData = mysqli_fetch_assoc($countResult);
+            $countData = mysqli_fetch_assoc($countResult);
 
-echo $countData['total'];
+            echo $countData['total'];
 
-?>
+            ?>
 
-</p>
+            </p>
             </div>
             <div class="card">
                 <h2>Monthly Revenue</h2>
@@ -364,21 +376,45 @@ echo $countData['total'];
 
                     <td>
 
-                    <a
-                    href="accept_shipment.php?id=<?php echo $shipment['id']; ?>"
-                    style="
-                    background:#ff6b35;
-                    color:white;
-                    padding:8px 14px;
-                    border-radius:6px;
-                    text-decoration:none;
-                    font-weight:bold;
-                    "
+                    <form action="assign_driver.php" method="POST">
+
+                    <input
+                    type="hidden"
+                    name="shipment_id"
+                    value="<?php echo $shipment['id']; ?>"
                     >
 
-                    Accept
+                    <select name="driver_id" required>
 
-                    </a>
+                    <option value="">
+                    Select Driver
+                    </option>
+
+                    <?php
+
+                    mysqli_data_seek($driverResult, 0);
+
+                    while($driver = mysqli_fetch_assoc($driverResult)) {
+
+                    ?>
+
+                    <option value="<?php echo $driver['id']; ?>">
+
+                    <?php echo $driver['full_name']; ?>
+
+                    </option>
+
+                    <?php } ?>
+
+                    </select>
+
+                    <button type="submit">
+
+                    Assign
+
+                    </button>
+
+                    </form>
 
                     </td>
 

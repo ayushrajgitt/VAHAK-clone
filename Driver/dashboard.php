@@ -18,6 +18,80 @@ if ($_SESSION['role'] != 'driver') {
 
 }
 
+
+include '../Includes/db.php';
+
+$driver_id = $_SESSION['user_id'];
+
+// fetch shipments assigned to this driver
+
+$query = "
+
+SELECT shipments.*, trucks.truck_name
+
+FROM shipments
+
+LEFT JOIN trucks
+ON shipments.truck_id = trucks.id
+
+WHERE driver_id = '$driver_id'
+
+";
+
+$result = mysqli_query($conn, $query);
+
+// total trips
+
+$totalTripsQuery = "
+
+SELECT COUNT(*) AS total_trips
+
+FROM shipments
+
+WHERE driver_id = '$driver_id'
+
+";
+
+$totalTripsResult = mysqli_query($conn, $totalTripsQuery);
+
+$totalTrips = mysqli_fetch_assoc($totalTripsResult)['total_trips'];
+
+// active deliveries
+
+$activeDeliveriesQuery = "
+
+SELECT COUNT(*) AS active_deliveries
+
+FROM shipments
+
+WHERE driver_id = '$driver_id'
+
+AND shipment_status = 'active'
+
+";
+
+$activeDeliveriesResult = mysqli_query($conn, $activeDeliveriesQuery);
+
+$activeDeliveries = mysqli_fetch_assoc($activeDeliveriesResult)['active_deliveries'];
+
+// completed deliveries
+
+$completedDeliveriesQuery = "
+
+SELECT COUNT(*) AS completed_deliveries
+
+FROM shipments
+
+WHERE driver_id = '$driver_id'
+
+AND shipment_status = 'completed'
+
+";
+
+$completedDeliveriesResult = mysqli_query($conn, $completedDeliveriesQuery);
+
+$completedDeliveries = mysqli_fetch_assoc($completedDeliveriesResult)['completed_deliveries'];
+
 ?>
 
 <!DOCTYPE html>
@@ -250,22 +324,23 @@ if ($_SESSION['role'] != 'driver') {
                 <h1>Welcome Driver 👋</h1>
                 <p>Manage your trips, earnings and deliveries easily.</p>
             </div>
-            <div class="driver-box">Driver ID : D2045</div>
-        </div>
+            <div class="driver-box">Driver ID :
+                D<?php echo 1000 + $_SESSION['user_id']; ?></div>
+            </div>
 
         <!-- quick stats -->
         <div class="cards">
             <div class="card">
                 <h2>Total Trips</h2>
-                <p>48</p>
+                <p><?php echo $totalTrips; ?></p>
             </div>
             <div class="card">
                 <h2>Active Deliveries</h2>
-                <p>6</p>
+                <p><?php echo $activeDeliveries; ?></p>
             </div>
             <div class="card">
-                <h2>Total Earnings</h2>
-                <p>₹78K</p>
+                <h2>Completed Deliveries</h2>
+                <p><?php echo $completedDeliveries; ?></p>
             </div>
             <div class="card">
                 <h2>Ratings</h2>
@@ -283,31 +358,53 @@ if ($_SESSION['role'] != 'driver') {
                     <th>Vehicle</th>
                     <th>Destination</th>
                     <th>Status</th>
+                    <th>Action</th>
                 </tr>
+
+                <?php while($shipment = mysqli_fetch_assoc($result)) { ?>
+
                 <tr>
-                    <td>#501</td>
-                    <td>Tata Truck</td>
-                    <td>Mumbai</td>
-                    <td><span class="status active">Active</span></td>
+
+                <td>
+                #<?php echo $shipment['id']; ?>
+                </td>
+
+                <td>
+                <?php echo $shipment['truck_name']; ?>
+                </td>
+
+                <td>
+                <?php echo $shipment['destination']; ?>
+                </td>
+
+                <td>
+
+                <?php if($shipment['shipment_status'] == 'accepted') { ?>
+
+                <a
+                href="update_status.php?id=<?php echo $shipment['id']; ?>&status=active"
+                style="
+                background:orange;
+                color:white;
+                padding:8px 14px;
+                border-radius:6px;
+                text-decoration:none;
+                font-weight:bold;
+                "
+                >
+
+                Start Trip
+
+                </a>
+
+                <?php } ?>
+
+                </td>
+
                 </tr>
-                <tr>
-                    <td>#502</td>
-                    <td>Ashok Leyland</td>
-                    <td>Delhi</td>
-                    <td><span class="status pending">Pending</span></td>
-                </tr>
-                <tr>
-                    <td>#503</td>
-                    <td>Eicher</td>
-                    <td>Kolkata</td>
-                    <td><span class="status completed">Completed</span></td>
-                </tr>
-                <tr>
-                    <td>#504</td>
-                    <td>BharatBenz</td>
-                    <td>Chennai</td>
-                    <td><span class="status active">Active</span></td>
-                </tr>
+
+                <?php } ?>
+               
             </table>
         </div>
 

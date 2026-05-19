@@ -18,7 +18,107 @@ if ($_SESSION['role'] != 'customer') {
 
 }
 
+include '../Includes/db.php';
+
+$customer_id = $_SESSION['user_id'];
+
+// total orders
+
+$totalOrdersQuery = "
+
+SELECT COUNT(*) AS total_orders
+
+FROM shipments
+
+WHERE customer_id = '$customer_id'
+
+";
+
+$totalOrdersResult = mysqli_query($conn, $totalOrdersQuery);
+
+$totalOrders = mysqli_fetch_assoc($totalOrdersResult)['total_orders'];
+
+// active shipments
+
+$activeQuery = "
+
+SELECT COUNT(*) AS active_shipments
+
+FROM shipments
+
+WHERE customer_id = '$customer_id'
+
+AND shipment_status = 'active'
+
+";
+
+$activeResult = mysqli_query($conn, $activeQuery);
+
+$activeShipments = mysqli_fetch_assoc($activeResult)['active_shipments'];
+
+// completed shipments
+
+$completedQuery = "
+
+SELECT COUNT(*) AS completed_shipments
+
+FROM shipments
+
+WHERE customer_id = '$customer_id'
+
+AND shipment_status = 'completed'
+
+";
+
+$completedResult = mysqli_query($conn, $completedQuery);
+
+$completedShipments = mysqli_fetch_assoc($completedResult)['completed_shipments'];
+
+// total payments
+
+$paymentQuery = "
+
+SELECT SUM(estimated_cost) AS total_payment
+
+FROM shipments
+
+WHERE customer_id = '$customer_id'
+
+";
+
+$paymentResult = mysqli_query($conn, $paymentQuery);
+
+$totalPayment = mysqli_fetch_assoc($paymentResult)['total_payment'];
+
+if(!$totalPayment) {
+
+    $totalPayment = 0;
+
+}
+
+// recent customer shipments
+
+$recentQuery = "
+
+SELECT shipments.*, trucks.truck_name
+
+FROM shipments
+
+LEFT JOIN trucks
+ON shipments.truck_id = trucks.id
+
+WHERE customer_id = '$customer_id'
+
+ORDER BY shipments.id DESC
+
+LIMIT 5
+
+";
+
+$recentResult = mysqli_query($conn, $recentQuery);
+
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -210,6 +310,7 @@ if ($_SESSION['role'] != 'customer') {
         .active    { background: green; }
         .pending   { background: orange; }
         .completed { background: #007bff; }
+        .accepted {background: #007bff;}
 
         /* responsive */
         @media (max-width: 768px) {
@@ -241,7 +342,22 @@ if ($_SESSION['role'] != 'customer') {
                     📦 Book Load
                 </a>
             </li>
-            <li>🚚 Track Shipment</li>
+            <li>
+                <a
+                href="track_shipment.php"
+                style="
+                color:white;
+                text-decoration:none;
+                display:block;
+                width:100%;
+                height:100%;
+                "
+                >
+
+                🚚 Track Shipment
+
+                </a>
+            </li>
             <li>📋 My Orders</li>
             <li>💳 Payment History</li>
             <li>🔔 Notifications</li>
@@ -259,26 +375,27 @@ if ($_SESSION['role'] != 'customer') {
                 <h1>Welcome Customer 👋</h1>
                 <p>Manage your shipments and orders easily.</p>
             </div>
-            <div class="profile-box">Customer ID : C1025</div>
-        </div>
+            <div class="profile-box">Customer ID :
+                C<?php echo 1000 + $_SESSION['user_id']; ?></div>
+            </div>
 
         <!-- stats cards -->
         <div class="cards">
             <div class="card">
                 <h2>Total Orders</h2>
-                <p>25</p>
+                <p><?php echo $totalOrders; ?></p>
             </div>
             <div class="card">
                 <h2>Active Shipments</h2>
-                <p>5</p>
+                <p><?php echo $activeShipments; ?></p>
             </div>
             <div class="card">
                 <h2>Completed Deliveries</h2>
-                <p>20</p>
+                <p><?php echo $completedShipments; ?></p>
             </div>
             <div class="card">
                 <h2>Total Payments</h2>
-                <p>₹45K</p>
+                <p>₹<?php echo $totalPayment; ?></p>
             </div>
         </div>
 
@@ -293,30 +410,35 @@ if ($_SESSION['role'] != 'customer') {
                     <th>Destination</th>
                     <th>Status</th>
                 </tr>
+                <?php while($shipment = mysqli_fetch_assoc($recentResult)) { ?>
+
                 <tr>
-                    <td>#1021</td>
-                    <td>Tata Truck</td>
-                    <td>Mumbai</td>
-                    <td><span class="status active">Active</span></td>
+
+                <td>
+                #<?php echo $shipment['id']; ?>
+                </td>
+
+                <td>
+                <?php echo $shipment['truck_name']; ?>
+                </td>
+
+                <td>
+                <?php echo $shipment['destination']; ?>
+                </td>
+
+                <td>
+
+                <span class="status <?php echo $shipment['shipment_status']; ?>">
+
+                <?php echo ucfirst($shipment['shipment_status']); ?>
+
+                </span>
+
+                </td>
+
                 </tr>
-                <tr>
-                    <td>#1022</td>
-                    <td>Ashok Leyland</td>
-                    <td>Delhi</td>
-                    <td><span class="status pending">Pending</span></td>
-                </tr>
-                <tr>
-                    <td>#1023</td>
-                    <td>Eicher</td>
-                    <td>Kolkata</td>
-                    <td><span class="status completed">Completed</span></td>
-                </tr>
-                <tr>
-                    <td>#1024</td>
-                    <td>BharatBenz</td>
-                    <td>Chennai</td>
-                    <td><span class="status active">Active</span></td>
-                </tr>
+
+                <?php } ?>
             </table>
         </div>
 
