@@ -89,6 +89,12 @@ if ($_SESSION['role'] != 'customer') {
             background: #ff6b35;
             transform: translateX(5px);
         }
+            
+        .sidebar-link {
+            text-decoration:none;
+            color:white;
+            display:block;
+        }
 
         /* right content */
         .content {
@@ -230,7 +236,11 @@ if ($_SESSION['role'] != 'customer') {
         <h3>Customer Panel</h3>
         <ul>
             <li>🏠 Home</li>
-            <li>📦 Book Load</li>
+            <li>
+                <a href="book_shipment.php" class="sidebar-link">
+                    📦 Book Load
+                </a>
+            </li>
             <li>🚚 Track Shipment</li>
             <li>📋 My Orders</li>
             <li>💳 Payment History</li>
