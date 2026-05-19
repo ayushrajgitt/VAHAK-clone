@@ -360,7 +360,20 @@ $recentResult = mysqli_query($conn, $recentQuery);
             </li>
             <li>📋 My Orders</li>
             <li>💳 Payment History</li>
-            <li>🔔 Notifications</li>
+            <li>
+                <a
+                href="notifications.php"
+                style="
+                color:white;
+                text-decoration:none;
+                display:block;
+                width:100%;
+                height:100%;
+                "
+                >
+                🔔 Notifications
+                </a>
+            </li>
             <li>📞 Support</li>
             <li>👤 Profile</li>
         </ul>

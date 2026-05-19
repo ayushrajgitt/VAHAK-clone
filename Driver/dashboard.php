@@ -353,58 +353,109 @@ $completedDeliveries = mysqli_fetch_assoc($completedDeliveriesResult)['completed
             <h2>Recent Trips</h2>
 
             <table>
-                <tr>
-                    <th>Trip ID</th>
-                    <th>Vehicle</th>
-                    <th>Destination</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
 
-                <?php while($shipment = mysqli_fetch_assoc($result)) { ?>
+            <tr>
 
-                <tr>
+            <th>Trip ID</th>
+            <th>Vehicle</th>
+            <th>Destination</th>
+            <th>Status</th>
+            <th>Action</th>
 
-                <td>
-                #<?php echo $shipment['id']; ?>
-                </td>
+            </tr>
 
-                <td>
-                <?php echo $shipment['truck_name']; ?>
-                </td>
+            <?php while($shipment = mysqli_fetch_assoc($result)) { ?>
 
-                <td>
-                <?php echo $shipment['destination']; ?>
-                </td>
+            <tr>
 
-                <td>
+            <td>
+            #<?php echo $shipment['id']; ?>
+            </td>
 
-                <?php if($shipment['shipment_status'] == 'accepted') { ?>
+            <td>
+            <?php echo $shipment['truck_name']; ?>
+            </td>
 
-                <a
-                href="update_status.php?id=<?php echo $shipment['id']; ?>&status=active"
-                style="
-                background:orange;
-                color:white;
-                padding:8px 14px;
-                border-radius:6px;
-                text-decoration:none;
-                font-weight:bold;
-                "
-                >
+            <td>
+            <?php echo $shipment['destination']; ?>
+            </td>
 
-                Start Trip
+            <td>
 
-                </a>
+            <span class="status <?php echo $shipment['shipment_status']; ?>">
 
-                <?php } ?>
+            <?php echo ucfirst($shipment['shipment_status']); ?>
 
-                </td>
+            </span>
 
-                </tr>
+            </td>
 
-                <?php } ?>
-               
+            <td>
+
+            <?php if($shipment['shipment_status'] == 'accepted') { ?>
+
+            <a
+            href="update_status.php?id=<?php echo $shipment['id']; ?>&status=active"
+            style="
+            background:orange;
+            color:white;
+            padding:8px 14px;
+            border-radius:6px;
+            text-decoration:none;
+            font-weight:bold;
+            "
+            >
+
+            Start Trip
+
+            </a>
+
+            <?php } else if($shipment['shipment_status'] == 'active') { ?>
+
+            <form action="verify_otp.php" method="POST">
+
+            <input
+            type="hidden"
+            name="shipment_id"
+            value="<?php echo $shipment['id']; ?>"
+            >
+
+            <input
+            type="text"
+            name="entered_otp"
+            placeholder="Enter OTP"
+            required
+            style="
+            padding:8px;
+            border-radius:6px;
+            border:1px solid #ccc;
+            "
+            >
+
+            <button type="submit">
+
+            Verify OTP
+
+            </button>
+
+            </form>
+
+            <?php } else { ?>
+
+            <span style="color:gray;font-weight:bold;">
+
+            Completed
+
+            </span>
+
+            <?php } ?>
+
+            </td>
+
+            </tr>
+
+            <?php } ?>
+
             </table>
         </div>
 
