@@ -1,3 +1,83 @@
+
+<?php
+
+session_start();
+
+include './Includes/db.php';
+
+include './Includes/header.php';
+
+// login logic
+if(isset($_POST['login'])){
+
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $role = $_POST['role'];
+
+    // check user in database
+    $query = "SELECT * FROM users 
+              WHERE email='$email' 
+              AND role='$role'";
+
+    $result = mysqli_query($conn, $query);
+
+    // if user exists
+    if(mysqli_num_rows($result) > 0){
+
+        $user = mysqli_fetch_assoc($result);
+
+        // verify encrypted password
+        if(password_verify($password, $user['password'])){
+
+            // create session
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_name'] = $user['name'];
+            $_SESSION['role'] = $user['role'];
+
+            // redirect according to role
+            if($role == 'admin'){
+
+                header("Location: Admin/dashboard.php");
+
+            }
+
+           elseif($role == 'driver'){
+
+            header("Location: Driver/dashboard.php");
+
+            }
+
+            elseif($role == 'transporter'){
+
+                header("Location: Transporter/dashboard.php");
+
+            }
+
+            else{
+
+                header("Location: Customer/dashboard.php");
+
+            }
+
+            exit();
+
+        } else {
+
+            echo "<script>alert('Wrong Password');</script>";
+
+        }
+
+    } else {
+
+        echo "<script>alert('User not found');</script>";
+
+    }
+}
+
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -860,18 +940,18 @@
           </button>
         </div>
 
-        <form action="index.php" method="POST" id="loginForm">
+        <form  method="POST" id="loginForm">
 
           <input type="hidden" name="role" id="roleInput" value="customer">
 
           <div class="form-group">
-            <label>Mobile / Username</label>
+            <label>Email</label>
             <div class="inp-wrap">
               <svg viewBox="0 0 24 24">
                 <circle cx="12" cy="8" r="4"/>
                 <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
               </svg>
-              <input type="text" name="username" placeholder="e.g. 9876543210" required>
+              <input type="text" name="email" placeholder="Enter Email" required>
             </div>
           </div>
 
@@ -890,12 +970,12 @@
             <a href="javascript:void(0)">Forgot password?</a>
           </div>
 
-          <button type="submit" class="submit-btn">Login →</button>
+          <button type="submit" name="login" class="submit-btn">Login →</button>
 
         </form>
 
         <div class="card-footer-note">
-          New here? <a href="javascript:void(0)">Create an account</a>
+          New here? <a href="index.php">Create an account</a>
         </div>
 
       </div>
@@ -934,11 +1014,11 @@
   const loginForm = document.getElementById('loginForm');
 
   loginForm.addEventListener('submit', function(e) {
-    const username = document.querySelector('input[name="username"]').value.trim();
+    const username = document.querySelector('input[name="email"]').value.trim();
     const password = document.querySelector('input[name="password"]').value.trim();
 
     if (username.length < 5) {
-      alert('Please enter a valid username.');
+      alert('Please enter a valid email.');
       e.preventDefault();
       return;
     }
