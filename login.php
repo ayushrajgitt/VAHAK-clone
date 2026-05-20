@@ -838,7 +838,7 @@ if(isset($_POST['login'])){
     <li><a href="#features">Features</a></li>
     <li><a href="#how">How It Works</a></li>
     <li><a href="#testimonials">Reviews</a></li>
-    <li><a href="javascript:void(0)" class="nav-btn">Get Started</a></li>
+    <li><a href="index.php" class="nav-btn">Get Started</a></li>
   </ul>
 
   <button class="hamburger" id="hamburger" aria-label="Menu">
