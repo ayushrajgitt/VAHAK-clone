@@ -310,7 +310,7 @@
 
     .role-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 8px;
       margin-bottom: 20px;
     }
@@ -844,6 +844,14 @@
             Driver
           </button>
 
+          <button type="button" class="role-btn" data-role="transporter">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 3h18v18H3z"/>
+              <path d="M8 12h8M12 8v8"/>
+            </svg>
+            Transporter
+          </button>
+
           <button type="button" class="role-btn" data-role="admin">
             <svg viewBox="0 0 24 24">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -857,37 +865,37 @@
           <input type="hidden" name="role" id="roleInput" value="customer">
 
           <div class="form-group">
-            <label>Mobile / Username</label>
+            <label>Mobile Number</label>
             <div class="inp-wrap">
               <svg viewBox="0 0 24 24">
                 <circle cx="12" cy="8" r="4"/>
                 <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
               </svg>
-              <input type="text" name="username" placeholder="e.g. 9876543210" required>
+              <input type="text" name="phone" id="phoneInput" placeholder="e.g. 9876543210" required pattern="[0-9]{10}">
             </div>
           </div>
 
-          <div class="form-group">
-            <label>Password</label>
+          <div class="form-group" id="otpGroup" style="display: none;">
+            <label>Enter 6-Digit OTP</label>
             <div class="inp-wrap">
               <svg viewBox="0 0 24 24">
                 <rect x="3" y="11" width="18" height="11" rx="2"/>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
-              <input type="password" name="password" placeholder="Enter password" required>
+              <input type="text" name="otp_code" id="otpInput" placeholder="XXXXXX" pattern="[0-9]{6}">
+            </div>
+            <div style="text-align:right; margin-top:5px;">
+              <small id="otpMessage" style="color:#ff8c60;"></small>
             </div>
           </div>
 
-          <div class="form-meta">
-            <a href="javascript:void(0)">Forgot password?</a>
-          </div>
-
-          <button type="submit" class="submit-btn">Login →</button>
+          <button type="button" class="submit-btn" id="sendOtpBtn">Send OTP →</button>
+          <button type="submit" class="submit-btn" id="loginBtn" style="display:none;">Verify & Login →</button>
 
         </form>
 
         <div class="card-footer-note">
-          New here? <a href="javascript:void(0)">Create an account</a>
+          New here? <a href="register.php">Create an account</a>
         </div>
 
       </div>
@@ -922,23 +930,67 @@
     });
   });
 
-  // basic form validation before submit
-  const loginForm = document.getElementById('loginForm');
+  // OTP AJAX Flow
+  const sendOtpBtn = document.getElementById('sendOtpBtn');
+  const loginBtn = document.getElementById('loginBtn');
+  const phoneInput = document.getElementById('phoneInput');
+  const otpGroup = document.getElementById('otpGroup');
+  const otpInput = document.getElementById('otpInput');
+  const otpMessage = document.getElementById('otpMessage');
 
-  loginForm.addEventListener('submit', function(e) {
-    const username = document.querySelector('input[name="username"]').value.trim();
-    const password = document.querySelector('input[name="password"]').value.trim();
-
-    if (username.length < 5) {
-      alert('Please enter a valid username.');
-      e.preventDefault();
+  sendOtpBtn.addEventListener('click', function() {
+    const phone = phoneInput.value.trim();
+    const role = roleInput.value;
+    
+    if(phone.length !== 10 || isNaN(phone)) {
+      alert("Please enter a valid 10-digit mobile number.");
       return;
     }
 
-    if (password.length < 4) {
-      alert('Password must be at least 4 characters.');
-      e.preventDefault();
-    }
+    sendOtpBtn.innerText = "Sending...";
+    sendOtpBtn.disabled = true;
+
+    fetch('send_otp.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `phone=${encodeURIComponent(phone)}&role=${encodeURIComponent(role)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+      if(data.success) {
+        // Show OTP field
+        otpGroup.style.display = 'block';
+        otpInput.required = true;
+        sendOtpBtn.style.display = 'none';
+        loginBtn.style.display = 'block';
+        
+        // Timer logic
+        let timeLeft = 60;
+        otpMessage.innerText = `OTP sent! Resend in ${timeLeft}s`;
+        
+        const timer = setInterval(() => {
+          timeLeft--;
+          otpMessage.innerText = `OTP sent! Resend in ${timeLeft}s`;
+          if(timeLeft <= 0) {
+            clearInterval(timer);
+            otpMessage.innerHTML = `<a href="#" onclick="location.reload()" style="color:#ff8c60; text-decoration:underline;">Resend OTP</a>`;
+          }
+        }, 1000);
+        
+        // Log to console for dev purposes if simulated
+        if(data.dev_otp) console.log("DEVELOPMENT OTP:", data.dev_otp);
+      } else {
+        alert(data.message);
+        sendOtpBtn.innerText = "Send OTP →";
+        sendOtpBtn.disabled = false;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert("Something went wrong. Please try again.");
+      sendOtpBtn.innerText = "Send OTP →";
+      sendOtpBtn.disabled = false;
+    });
   });
 
 </script>

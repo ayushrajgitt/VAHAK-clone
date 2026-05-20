@@ -3,48 +3,48 @@ require_once '../Includes/db_connect.php';
 require_once '../Includes/auth.php';
 require_once '../Includes/functions.php';
 
-require_role('driver');
+require_role('transporter');
 $user_id = $_SESSION['user_id'];
 $user_name = $_SESSION['name'];
 
 // Fetch Stats
 $stats = [
-    'total_trips' => 0,
-    'active_deliveries' => 0,
-    'total_earnings' => 0,
-    'ratings' => 0
+    'total_trucks' => 0,
+    'total_drivers' => 0,
+    'active_shipments' => 0,
+    'monthly_revenue' => 0
 ];
 
-$stmt = $conn->prepare("SELECT COUNT(*) as cnt FROM shipments WHERE driver_id = ?");
+$stmt = $conn->prepare("SELECT COUNT(*) as cnt FROM vehicles WHERE owner_id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
-$stats['total_trips'] = $stmt->get_result()->fetch_assoc()['cnt'];
+$stats['total_trucks'] = $stmt->get_result()->fetch_assoc()['cnt'];
 
-$stmt = $conn->prepare("SELECT COUNT(*) as cnt FROM shipments WHERE driver_id = ? AND status IN ('active', 'in_transit')");
+$stmt = $conn->prepare("SELECT COUNT(*) as cnt FROM driver_transporter WHERE transporter_id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
-$stats['active_deliveries'] = $stmt->get_result()->fetch_assoc()['cnt'];
+$stats['total_drivers'] = $stmt->get_result()->fetch_assoc()['cnt'];
 
-$stmt = $conn->prepare("SELECT SUM(amount) as total FROM payments p JOIN shipments s ON p.shipment_id = s.id WHERE s.driver_id = ? AND p.status = 'settled'");
+$stmt = $conn->prepare("SELECT COUNT(*) as cnt FROM shipments WHERE transporter_id = ? AND status IN ('active', 'in_transit')");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stats['active_shipments'] = $stmt->get_result()->fetch_assoc()['cnt'];
+
+// Revenue for current month
+$stmt = $conn->prepare("SELECT SUM(amount) as total FROM payments p JOIN shipments s ON p.shipment_id = s.id WHERE s.transporter_id = ? AND p.status = 'settled' AND MONTH(p.paid_at) = MONTH(CURRENT_DATE()) AND YEAR(p.paid_at) = YEAR(CURRENT_DATE())");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $res = $stmt->get_result()->fetch_assoc();
-$stats['total_earnings'] = $res['total'] ? $res['total'] : 0;
+$stats['monthly_revenue'] = $res['total'] ? $res['total'] : 0;
 
-$stmt = $conn->prepare("SELECT AVG(rating) as avg_rating FROM ratings WHERE to_user_id = ?");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$res = $stmt->get_result()->fetch_assoc();
-$stats['ratings'] = $res['avg_rating'] ? round($res['avg_rating'], 1) : 0;
-
-// Fetch Recent Trips
-$recent_trips = [];
-$stmt = $conn->prepare("SELECT id, truck_type, drop_city, status FROM shipments WHERE driver_id = ? ORDER BY created_at DESC LIMIT 5");
+// Fetch Recent Fleet Activity
+$recent_shipments = [];
+$stmt = $conn->prepare("SELECT s.id, s.pickup_city, s.drop_city, s.status, u.name as driver_name FROM shipments s LEFT JOIN users u ON s.driver_id = u.id WHERE s.transporter_id = ? ORDER BY s.created_at DESC LIMIT 5");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 while ($row = $result->fetch_assoc()) {
-    $recent_trips[] = $row;
+    $recent_shipments[] = $row;
 }
 ?>
 <!DOCTYPE html>
@@ -54,7 +54,7 @@ while ($row = $result->fetch_assoc()) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Dashboard</title>
+    <title>Transporter Dashboard</title>
     <link rel="stylesheet" href="../Css/style.Css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -87,7 +87,6 @@ while ($row = $result->fetch_assoc()) {
         .status.pending { background: orange; }
         .status.delivered { background: green; }
         .status.cancelled { background: red; }
-        @media (max-width: 768px) { .dashboard { flex-direction: column; } .sidebar { width: 100%; } .topbar-dash { flex-direction: column; align-items: flex-start; gap: 15px; } }
     </style>
 </head>
 
@@ -97,59 +96,59 @@ while ($row = $result->fetch_assoc()) {
 
 <div class="dashboard">
 
-    <?php include '../Includes/sidebar_driver.php'; ?>
+    <?php include '../Includes/sidebar_transporter.php'; ?>
 
     <div class="content">
 
         <div class="topbar-dash">
             <div>
-                <h1>Welcome, <?= htmlspecialchars($user_name) ?> 👋</h1>
-                <p>Manage your trips, earnings and deliveries easily.</p>
+                <h1>Fleet Dashboard 🚛</h1>
+                <p>Manage your trucks, drivers, and active logistics.</p>
             </div>
-            <div class="profile-box">Driver ID : D<?= 2000 + $user_id ?></div>
+            <div class="profile-box">Transporter ID : T<?= 3000 + $user_id ?></div>
         </div>
 
         <div class="cards">
             <div class="card">
-                <h2>Total Trips</h2>
-                <p><?= $stats['total_trips'] ?></p>
+                <h2>Total Trucks</h2>
+                <p><?= $stats['total_trucks'] ?></p>
             </div>
             <div class="card">
-                <h2>Active Deliveries</h2>
-                <p><?= $stats['active_deliveries'] ?></p>
+                <h2>Total Drivers</h2>
+                <p><?= $stats['total_drivers'] ?></p>
             </div>
             <div class="card">
-                <h2>Total Earnings</h2>
-                <p><?= format_currency($stats['total_earnings']) ?></p>
+                <h2>Active Fleet Shipments</h2>
+                <p><?= $stats['active_shipments'] ?></p>
             </div>
             <div class="card">
-                <h2>Ratings</h2>
-                <p><?= $stats['ratings'] ?> ★</p>
+                <h2>Monthly Revenue</h2>
+                <p><?= format_currency($stats['monthly_revenue']) ?></p>
             </div>
         </div>
 
         <div class="table-section">
-            <h2>Recent Trips</h2>
+            <h2>Recent Fleet Activity</h2>
 
-            <?php if(count($recent_trips) > 0): ?>
+            <?php if(count($recent_shipments) > 0): ?>
             <table>
                 <tr>
-                    <th>Trip ID</th>
-                    <th>Vehicle</th>
-                    <th>Destination</th>
+                    <th>Shipment ID</th>
+                    <th>Route</th>
+                    <th>Assigned Driver</th>
                     <th>Status</th>
                 </tr>
-                <?php foreach($recent_trips as $trip): ?>
+                <?php foreach($recent_shipments as $shipment): ?>
                 <tr>
-                    <td>#<?= $trip['id'] ?></td>
-                    <td><?= htmlspecialchars($trip['truck_type']) ?></td>
-                    <td><?= htmlspecialchars($trip['drop_city']) ?></td>
-                    <td><span class="status <?= $trip['status'] ?>"><?= ucfirst($trip['status']) ?></span></td>
+                    <td>#<?= $shipment['id'] ?></td>
+                    <td><?= htmlspecialchars($shipment['pickup_city']) ?> → <?= htmlspecialchars($shipment['drop_city']) ?></td>
+                    <td><?= $shipment['driver_name'] ? htmlspecialchars($shipment['driver_name']) : '<span style="color:red">Unassigned</span>' ?></td>
+                    <td><span class="status <?= $shipment['status'] ?>"><?= ucfirst($shipment['status']) ?></span></td>
                 </tr>
                 <?php endforeach; ?>
             </table>
             <?php else: ?>
-            <p>You haven't completed any trips yet. <a href="available_loads.php">Find a load!</a></p>
+            <p>No recent activity. <a href="available_loads.php">Find new loads!</a></p>
             <?php endif; ?>
         </div>
 
