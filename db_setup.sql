@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     role ENUM('customer', 'driver', 'transporter', 'admin') NOT NULL,
     status ENUM('active', 'inactive', 'blocked') DEFAULT 'active',
+    otp_code VARCHAR(10) DEFAULT NULL,
+    otp_expires_at DATETIME DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
