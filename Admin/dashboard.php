@@ -18,6 +18,98 @@ if ($_SESSION['role'] != 'admin') {
 
 }
 
+include '../Includes/db.php';
+
+// total users
+
+$userQuery = "
+
+SELECT COUNT(*) AS total_users
+
+FROM users
+
+";
+
+$userResult = mysqli_query($conn, $userQuery);
+
+$userData = mysqli_fetch_assoc($userResult);
+
+$totalUsers = $userData['total_users'];
+
+// total shipments
+
+$shipmentQuery = "
+
+SELECT COUNT(*) AS total_shipments
+
+FROM shipments
+
+";
+
+$shipmentResult = mysqli_query($conn, $shipmentQuery);
+
+$shipmentData = mysqli_fetch_assoc($shipmentResult);
+
+$totalShipments = $shipmentData['total_shipments'];
+
+// active deliveries
+
+$activeQuery = "
+
+SELECT COUNT(*) AS active_shipments
+
+FROM shipments
+
+WHERE shipment_status = 'active'
+
+";
+
+$activeResult = mysqli_query($conn, $activeQuery);
+
+$activeData = mysqli_fetch_assoc($activeResult);
+
+$activeShipments = $activeData['active_shipments'];
+
+// completed deliveries
+
+$completedQuery = "
+
+SELECT COUNT(*) AS completed_shipments
+
+FROM shipments
+
+WHERE shipment_status = 'completed'
+
+";
+
+$completedResult = mysqli_query($conn, $completedQuery);
+
+$completedData = mysqli_fetch_assoc($completedResult);
+
+$completedShipments = $completedData['completed_shipments'];
+
+// recent shipment activity
+
+$recentQuery = "
+
+SELECT
+shipments.id,
+shipments.shipment_status,
+users.full_name
+
+FROM shipments
+
+LEFT JOIN users
+ON shipments.customer_id = users.id
+
+ORDER BY shipments.id DESC
+
+LIMIT 5
+
+";
+
+$recentResult = mysqli_query($conn, $recentQuery);
+
 ?>
 
 <!DOCTYPE html>
@@ -205,6 +297,7 @@ if ($_SESSION['role'] != 'admin') {
         .active    { background: green; }
         .pending   { background: orange; }
         .completed { background: #007bff; }
+        .accepted { background: #ff6b35;}
 
         /* responsive */
         @media (max-width: 768px) {
@@ -256,20 +349,20 @@ if ($_SESSION['role'] != 'admin') {
         <!-- overview cards -->
         <div class="cards">
             <div class="card">
-                <h2>Total Customers</h2>
-                <p>320</p>
+                <h2>Total Users</h2>
+                <p><?php echo $totalUsers; ?></p>
             </div>
             <div class="card">
-                <h2>Total Drivers</h2>
-                <p>150</p>
+                <h2>Total Shipments</h2>
+                <p><?php echo $totalShipments; ?></p>
             </div>
             <div class="card">
-                <h2>Active Shipments</h2>
-                <p>48</p>
+                <h2>Active Deliveries</h2>
+                <p><?php echo $activeShipments; ?></p>
             </div>
             <div class="card">
-                <h2>Total Revenue</h2>
-                <p>₹5.2L</p>
+                <h2>Completed Deliveries</h2>
+                <p><?php echo $completedShipments; ?></p>
             </div>
         </div>
 
@@ -284,30 +377,42 @@ if ($_SESSION['role'] != 'admin') {
                     <th>Driver</th>
                     <th>Status</th>
                 </tr>
+
+                <?php while($shipment = mysqli_fetch_assoc($recentResult)) { ?>
+
                 <tr>
-                    <td>#S101</td>
-                    <td>Rahul Sharma</td>
-                    <td>Rakesh Kumar</td>
-                    <td><span class="status active">Active</span></td>
+
+                <td>
+
+                #<?php echo $shipment['id']; ?>
+
+                </td>
+
+                <td>
+
+                <?php echo $shipment['full_name']; ?>
+
+                </td>
+
+                <td>
+
+                Driver Assigned
+
+                </td>
+
+                <td>
+
+                <span class="status <?php echo $shipment['shipment_status']; ?>">
+
+                <?php echo ucfirst($shipment['shipment_status']); ?>
+
+                </span>
+
+                </td>
+
                 </tr>
-                <tr>
-                    <td>#S102</td>
-                    <td>Anjali Verma</td>
-                    <td>Vikram Singh</td>
-                    <td><span class="status pending">Pending</span></td>
-                </tr>
-                <tr>
-                    <td>#S103</td>
-                    <td>Amit Patel</td>
-                    <td>Suresh Yadav</td>
-                    <td><span class="status completed">Completed</span></td>
-                </tr>
-                <tr>
-                    <td>#S104</td>
-                    <td>Neha Gupta</td>
-                    <td>Arjun Das</td>
-                    <td><span class="status active">Active</span></td>
-                </tr>
+
+                <?php } ?>
             </table>
         </div>
 
