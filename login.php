@@ -9,6 +9,7 @@
   <!-- google fonts -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  +
 
   <style>
 
@@ -762,13 +763,13 @@
 
 <!-- navbar -->
 <nav>
-  <div class="nav-logo">VAH<span>AK</span></div>
+  <div class="nav-logo"><a href="home.php" style="text-decoration: none; color:white;" >VAH<span>AK</span></a></div>
 
-  <ul class="nav-links" id="navLinks">
-    <li><a href="#features">Features</a></li>
-    <li><a href="#how">How It Works</a></li>
-    <li><a href="#testimonials">Reviews</a></li>
-    <li><a href="javascript:void(0)" class="nav-btn">Get Started</a></li>
+  <ul href="home.php" class="nav-links" id="navLinks">
+    <li><a href="home.php">Features</a></li>
+    <li><a href="home.php">How It Works</a></li>
+    <li><a href="home.php">Reviews</a></li>
+    <li><a href="register.php" class="nav-btn">Get Started</a></li>
   </ul>
 
   <button class="hamburger" id="hamburger" aria-label="Menu">
