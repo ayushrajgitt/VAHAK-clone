@@ -1,0 +1,4 @@
+<?php $u = require_user(); $load = load_with_people((int)($_GET['id'] ?? 0)); $other = $load ? review_target($load, $u) : null; ?>
+<?php if (!$load || $load['status'] !== 'paid' || !$other): ?><section class="panel"><p>This shipment is not ready for your review.</p></section><?php else: ?>
+<section class="auth"><h1>Review completed shipment</h1><form method="post" class="form"><input type="hidden" name="action" value="review"><input type="hidden" name="load_id" value="<?= $load['id'] ?>"><input type="hidden" name="reviewed_id" value="<?= $other ?>"><label>Rating<select name="rating"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></label><label>Comment<textarea required name="comment"></textarea></label><button class="button">Submit review</button></form></section>
+<?php endif; ?>
