@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vahak Logistics System — DFD</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #252a36;
+    --accent: #5b8cff;
+    --accent2: #00d4aa;
+    --accent3: #ff6b6b;
+    --accent4: #ffd166;
+    --text: #e8ecf4;
+    --muted: #6b7694;
+    --node-fill: #1a2035;
+    --process-fill: #0f1a2e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────── */
+  header {
+    padding: 36px 48px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .logo-group { display: flex; flex-direction: column; gap: 4px; }
+  .logo-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+  h1 span { color: var(--accent); }
+  .header-meta {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  /* ── NAV ─────────────────────────────────────────────── */
+  nav {
+    display: flex;
+    gap: 4px;
+    padding: 16px 48px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-btn {
+    padding: 7px 20px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.18s;
+    letter-spacing: 0.5px;
+  }
+  .nav-btn:hover { color: var(--text); border-color: var(--border); }
+  .nav-btn.active {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+  .download-btn {
+    margin-left: auto;
+    padding: 7px 20px;
+    border-radius: 6px;
+    border: 1px solid var(--accent2);
+    background: transparent;
+    color: var(--accent2);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .download-btn:hover { background: var(--accent2); color: #000; }
+
+  /* ── MAIN SECTIONS ───────────────────────────────────── */
+  .section { display: none; padding: 40px 48px 60px; }
+  .section.active { display: block; }
+
+  .section-title {
+    font-size: 13px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .section-subtitle {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 32px;
+    color: var(--text);
+  }
+
+  /* ── LEGEND ──────────────────────────────────────────── */
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    padding: 14px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .legend-swatch {
+    width: 26px;
+    height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .leg-ext { background: #1e2d1e; border: 1.5px solid var(--accent2); border-radius: 3px; }
+  .leg-proc { background: #0f1a2e; border: 2px solid var(--accent); border-radius: 50%; }
+  .leg-db { background: #1e1a10; border: 1.5px solid var(--accent4); }
+  .leg-flow { background: var(--muted); height: 2px; border-radius: 1px; }
+
+  /* ── SVG WRAPPER ─────────────────────────────────────── */
+  .svg-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: auto;
+    padding: 24px;
+  }
+  svg text {
+    font-family: 'Sora', sans-serif;
+  }
+
+  /* ── DATA STORE TABLE ────────────────────────────────── */
+  .ds-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+    margin-top: 32px;
+  }
+  .ds-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 3px solid var(--accent4);
+  }
+  .ds-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent4);
+    margin-bottom: 6px;
+  }
+  .ds-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── PRINT / DOWNLOAD ────────────────────────────────── */
+  @media print {
+    nav, .download-btn { display: none !important; }
+    .section { display: block !important; page-break-after: always; }
+    body { background: white; color: #111; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-group">
+    <div class="logo-eyebrow">Software Engineering · Data Flow Diagrams</div>
+    <h1>Vahak <span>Logistics</span> System</h1>
+  </div>
+  <div class="header-meta">
+    DFD Level 0 + Level 1<br>
+    Database: SQLite<br>
+    Actors: Shipper · Driver · Transporter · Admin
+  </div>
+</header>
+
+<nav>
+  <button class="nav-btn active" onclick="show('l0', this)">Level 0 — Context DFD</button>
+  <button class="nav-btn" onclick="show('l1', this)">Level 1 — Detailed DFD</button>
+  <button class="nav-btn" onclick="show('ds', this)">Data Stores</button>
+  <button class="download-btn" onclick="downloadSVG()">⬇ Download SVG</button>
+</nav>
+
+<!-- ══════════════════ LEVEL 0 ══════════════════ -->
+<div id="l0" class="section active">
+  <div class="section-title">DFD · Level 0</div>
+  <div class="section-subtitle">Context Diagram — Vahak Logistics System</div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch leg-ext"></div> External Entity</div>
+    <div class="legend-item"><div class="legend-swatch leg-proc" style="width:14px;height:14px;border-radius:50%"></div> System Process</div>
+    <div class="legend-item"><div class="legend-swatch leg-db"></div> Data Store</div>
+    <div class="legend-item"><div class="legend-swatch leg-flow"></div> Data Flow</div>
+  </div>
+  <div class="svg-wrap">
+    <svg id="svg-l0" viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:760px;">
+      <defs>
+        <marker id="arr0" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#5b8cff" opacity="0.85"/>
+        </marker>
+        <marker id="arr0b" markerWidth="8" markerHeight="8" refX="2" refY="3" orient="auto">
+          <path d="M8,0 L8,6 L0,3 z" fill="#5b8cff" opacity="0.85"/>
+        </marker>
+        <marker id="arr0g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#00d4aa" opacity="0.85"/>
+        </marker>
+        <marker id="arr0y" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#ffd166" opacity="0.85"/>
+        </marker>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- Central Process -->
+      <circle cx="500" cy="310" r="92" fill="#0d1525" stroke="#5b8cff" stroke-width="2.5" filter="url(#glow)"/>
+      <circle cx="500" cy="310" r="86" fill="#0d1525" stroke="#5b8cff" stroke-width="0.5" opacity="0.4"/>
+      <text x="500" y="304" text-anchor="middle" fill="#5b8cff" font-size="13" font-weight="600">Vahak Logistics</text>
+      <text x="500" y="322" text-anchor="middle" fill="#5b8cff" font-size="13" font-weight="600">System</text>
+
+      <!-- External Entities -->
+      <!-- Shipper (left) -->
+      <rect x="30" y="275" width="110" height="44" rx="6" fill="#1e2d1e" stroke="#00d4aa" stroke-width="1.8"/>
+      <text x="85" y="302" text-anchor="middle" fill="#00d4aa" font-size="13" font-weight="600">Shipper</text>
+
+      <!-- Driver (top-right) -->
+      <rect x="820" y="70" width="110" height="44" rx="6" fill="#1e2d1e" stroke="#00d4aa" stroke-width="1.8"/>
+      <text x="875" y="97" text-anchor="middle" fill="#00d4aa" font-size="13" font-weight="600">Driver</text>
+
+      <!-- Transporter (right) -->
+      <rect x="820" y="250" width="120" height="44" rx="6" fill="#1e2d1e" stroke="#00d4aa" stroke-width="1.8"/>
+      <text x="880" y="277" text-anchor="middle" fill="#00d4aa" font-size="13" font-weight="600">Transporter</text>
+
+      <!-- Admin (bottom-right) -->
+      <rect x="820" y="450" width="110" height="44" rx="6" fill="#1e2d1e" stroke="#00d4aa" stroke-width="1.8"/>
+      <text x="875" y="477" text-anchor="middle" fill="#00d4aa" font-size="13" font-weight="600">Admin</text>
+
+      <!-- Database (bottom) -->
+      <ellipse cx="500" cy="570" rx="74" ry="18" fill="#1e1a10" stroke="#ffd166" stroke-width="1.8"/>
+      <rect x="426" y="554" width="148" height="30" fill="#1e1a10" stroke="none"/>
+      <ellipse cx="500" cy="554" rx="74" ry="18" fill="#1e1a10" stroke="#ffd166" stroke-width="1.8"/>
+      <text x="500" y="558" text-anchor="middle" fill="#ffd166" font-size="11" font-weight="600">SQLite Database</text>
+
+      <!-- ── FLOW LINES ── -->
+      <!-- Shipper → System -->
+      <line x1="140" y1="290" x2="408" y2="302" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#arr0g)" opacity="0.8"/>
+      <rect x="155" y="258" width="190" height="30" rx="4" fill="#0a0c10" stroke="#252a36" stroke-width="1"/>
+      <text x="250" y="270" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Signup/Login, Add Load,</text>
+      <text x="250" y="282" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Confirm/Reject Driver, Share OTP, Review</text>
+
+      <!-- System → Shipper -->
+      <line x1="408" y1="320" x2="140" y2="316" stroke="#5b8cff" stroke-width="1.5" marker-end="url(#arr0)" opacity="0.8"/>
+      <rect x="148" y="322" width="190" height="30" rx="4" fill="#0a0c10" stroke="#252a36" stroke-width="1"/>
+      <text x="243" y="334" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Dashboards, Notifications,</text>
+      <text x="243" y="346" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Payment Status, Profiles</text>
+
+      <!-- Driver → System -->
+      <line x1="820" y1="102" x2="572" y2="246" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#arr0g)" opacity="0.8"/>
+      <rect x="640" y="136" width="182" height="42" rx="4" fill="#0a0c10" stroke="#252a36" stroke-width="1"/>
+      <text x="731" y="150" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Signup/Login, Find Load,</text>
+      <text x="731" y="162" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Accept Load, Mark Shipped,</text>
+      <text x="731" y="174" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Enter OTP, Review</text>
+
+      <!-- System → Driver -->
+      <line x1="584" y1="234" x2="820" y2="96" stroke="#5b8cff" stroke-width="1.5" marker-end="url(#arr0)" opacity="0.8"/>
+      <rect x="630" y="88" width="178" height="42" rx="4" fill="#0a0c10" stroke="#252a36" stroke-width="1"/>
+      <text x="719" y="103" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Loads, OTP Result,</text>
+      <text x="719" y="115" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Payment Release, Reviews</text>
+
+      <!-- Transporter → System -->
+      <line x1="820" y1="268" x2="592" y2="300" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#arr0g)" opacity="0.8"/>
+      <rect x="640" y="302" width="178" height="42" rx="4" fill="#0a0c10" stroke="#252a36" stroke-width="1"/>
+      <text x="729" y="316" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Signup/Login, Find Load,</text>
+      <text x="729" y="328" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Assign Driver, Manage Drivers</text>
+
+      <!-- System → Transporter -->
+      <line x1="592" y1="286" x2="820" y2="264" stroke="#5b8cff" stroke-width="1.5" marker-end="url(#arr0)" opacity="0.8"/>
+      <rect x="626" y="240" width="188" height="30" rx="4" fill="#0a0c10" stroke="#252a36" stroke-width="1"/>
+      <text x="720" y="252" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Loads, Assigned Driver Status,</text>
+      <text x="720" y="263" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Notifications</text>
+
+      <!-- Admin → System -->
+      <line x1="820" y1="468" x2="572" y2="370" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#arr0g)" opacity="0.8"/>
+      <rect x="634" y="426" width="192" height="30" rx="4" fill="#0a0c10" stroke="#252a36" stroke-width="1"/>
+      <text x="730" y="438" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Manage Users, Shipments,</text>
+      <text x="730" y="450" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Support Tickets</text>
+
+      <!-- System → Admin -->
+      <line x1="572" y1="380" x2="820" y2="476" stroke="#5b8cff" stroke-width="1.5" marker-end="url(#arr0)" opacity="0.8"/>
+      <rect x="620" y="374" width="204" height="42" rx="4" fill="#0a0c10" stroke="#252a36" stroke-width="1"/>
+      <text x="722" y="388" text-anchor="middle" fill="#a0b0c8" font-size="9.5">All Activity, Users,</text>
+      <text x="722" y="400" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Shipments, Support Questions</text>
+
+      <!-- System ↔ DB -->
+      <line x1="500" y1="402" x2="500" y2="536" stroke="#ffd166" stroke-width="1.5" marker-end="url(#arr0y)" opacity="0.8"/>
+      <line x1="512" y1="536" x2="512" y2="402" stroke="#ffd166" stroke-width="1.5" marker-end="url(#arr0y)" opacity="0.8"/>
+      <rect x="338" y="464" width="148" height="42" rx="4" fill="#0a0c10" stroke="#252a36" stroke-width="1"/>
+      <text x="412" y="478" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Users, Loads, OTP,</text>
+      <text x="412" y="490" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Reviews, Payments,</text>
+      <text x="412" y="502" text-anchor="middle" fill="#a0b0c8" font-size="9.5">Notifications, Support</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ══════════════════ LEVEL 1 ══════════════════ -->
+<div id="l1" class="section">
+  <div class="section-title">DFD · Level 1</div>
+  <div class="section-subtitle">Detailed Process Diagram — All 8 Sub-Processes</div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch leg-ext"></div> External Entity</div>
+    <div class="legend-item"><div class="legend-swatch leg-proc" style="width:14px;height:14px;border-radius:50%"></div> Process</div>
+    <div class="legend-item"><div class="legend-swatch leg-db"></div> Data Store</div>
+    <div class="legend-item"><div class="legend-swatch leg-flow"></div> Data Flow</div>
+  </div>
+  <div class="svg-wrap">
+    <svg id="svg-l1" viewBox="0 0 1400 1060" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-width:900px;">
+      <defs>
+        <marker id="a1" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L7,3 z" fill="#5b8cff" opacity="0.9"/>
+        </marker>
+        <marker id="a1g" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L7,3 z" fill="#00d4aa" opacity="0.9"/>
+        </marker>
+        <marker id="a1r" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L7,3 z" fill="#ff6b6b" opacity="0.9"/>
+        </marker>
+        <marker id="a1y" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L7,3 z" fill="#ffd166" opacity="0.9"/>
+        </marker>
+        <filter id="g2" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2.5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- ── EXTERNAL ENTITIES ── -->
+      <rect x="20" y="420" width="100" height="38" rx="5" fill="#1e2d1e" stroke="#00d4aa" stroke-width="1.8"/>
+      <text x="70" y="444" text-anchor="middle" fill="#00d4aa" font-size="12" font-weight="600">Shipper</text>
+
+      <rect x="1280" y="54" width="100" height="38" rx="5" fill="#1e2d1e" stroke="#00d4aa" stroke-width="1.8"/>
+      <text x="1330" y="78" text-anchor="middle" fill="#00d4aa" font-size="12" font-weight="600">Driver</text>
+
+      <rect x="20" y="54" width="110" height="38" rx="5" fill="#1e2d1e" stroke="#00d4aa" stroke-width="1.8"/>
+      <text x="75" y="78" text-anchor="middle" fill="#00d4aa" font-size="12" font-weight="600">Transporter</text>
+
+      <rect x="20" y="200" width="100" height="38" rx="5" fill="#1e2d1e" stroke="#00d4aa" stroke-width="1.8"/>
+      <text x="70" y="224" text-anchor="middle" fill="#00d4aa" font-size="12" font-weight="600">Admin</text>
+
+      <!-- ── PROCESSES ── -->
+      <!-- P1: Auth -->
+      <circle cx="260" cy="290" r="62" fill="#0d1525" stroke="#5b8cff" stroke-width="2" filter="url(#g2)"/>
+      <text x="260" y="282" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">1. Auth &amp;</text>
+      <text x="260" y="295" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">Role Mgmt</text>
+
+      <!-- P2: Load Mgmt -->
+      <circle cx="560" cy="540" r="62" fill="#0d1525" stroke="#5b8cff" stroke-width="2" filter="url(#g2)"/>
+      <text x="560" y="532" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">2. Load</text>
+      <text x="560" y="545" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">Management</text>
+
+      <!-- P3: Acceptance -->
+      <circle cx="560" cy="330" r="62" fill="#0d1525" stroke="#5b8cff" stroke-width="2" filter="url(#g2)"/>
+      <text x="560" y="322" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">3. Acceptance &amp;</text>
+      <text x="560" y="335" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">Assignment</text>
+
+      <!-- P4: Delivery OTP -->
+      <circle cx="920" cy="420" r="62" fill="#0d1525" stroke="#5b8cff" stroke-width="2" filter="url(#g2)"/>
+      <text x="920" y="412" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">4. Delivery &amp;</text>
+      <text x="920" y="425" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">OTP Verify</text>
+
+      <!-- P5: Payment -->
+      <circle cx="1160" cy="420" r="62" fill="#0d1525" stroke="#5b8cff" stroke-width="2" filter="url(#g2)"/>
+      <text x="1160" y="412" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">5. Fake Payment</text>
+      <text x="1160" y="425" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">Management</text>
+
+      <!-- P6: Reviews -->
+      <circle cx="920" cy="620" r="62" fill="#0d1525" stroke="#5b8cff" stroke-width="2" filter="url(#g2)"/>
+      <text x="920" y="612" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">6. Reviews &amp;</text>
+      <text x="920" y="625" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">Profiles</text>
+
+      <!-- P7: Support -->
+      <circle cx="700" cy="840" r="62" fill="#0d1525" stroke="#5b8cff" stroke-width="2" filter="url(#g2)"/>
+      <text x="700" y="832" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">7. Customer</text>
+      <text x="700" y="845" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">Support</text>
+
+      <!-- P8: Admin Mgmt -->
+      <circle cx="260" cy="200" r="62" fill="#0d1525" stroke="#5b8cff" stroke-width="2" filter="url(#g2)"/>
+      <text x="260" y="192" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">8. Admin</text>
+      <text x="260" y="205" text-anchor="middle" fill="#5b8cff" font-size="9.5" font-weight="600">Management</text>
+
+      <!-- ── DATA STORES ── -->
+      <!-- Users Table -->
+      <rect x="50" y="600" width="140" height="32" rx="4" fill="#1e1a10" stroke="#ffd166" stroke-width="1.5"/>
+      <text x="120" y="621" text-anchor="middle" fill="#ffd166" font-size="10" font-weight="600">D1: Users Table</text>
+
+      <!-- Loads Table -->
+      <rect x="500" y="720" width="140" height="32" rx="4" fill="#1e1a10" stroke="#ffd166" stroke-width="1.5"/>
+      <text x="570" y="741" text-anchor="middle" fill="#ffd166" font-size="10" font-weight="600">D2: Loads Table</text>
+
+      <!-- Fleet (Transporter Drivers) -->
+      <rect x="400" y="440" width="170" height="32" rx="4" fill="#1e1a10" stroke="#ffd166" stroke-width="1.5"/>
+      <text x="485" y="461" text-anchor="middle" fill="#ffd166" font-size="10" font-weight="600">D3: Transporter Drivers</text>
+
+      <!-- Notifications -->
+      <rect x="750" y="680" width="160" height="32" rx="4" fill="#1e1a10" stroke="#ffd166" stroke-width="1.5"/>
+      <text x="830" y="701" text-anchor="middle" fill="#ffd166" font-size="10" font-weight="600">D4: Notifications</text>
+
+      <!-- Reviews -->
+      <rect x="750" y="750" width="140" height="32" rx="4" fill="#1e1a10" stroke="#ffd166" stroke-width="1.5"/>
+      <text x="820" y="771" text-anchor="middle" fill="#ffd166" font-size="10" font-weight="600">D5: Reviews</text>
+
+      <!-- Support Tickets -->
+      <rect x="750" y="830" width="160" height="32" rx="4" fill="#1e1a10" stroke="#ffd166" stroke-width="1.5"/>
+      <text x="830" y="851" text-anchor="middle" fill="#ffd166" font-size="10" font-weight="600">D6: Support Tickets</text>
+
+      <!-- ══ FLOW LINES ══ -->
+
+      <!-- Actors → P1: Auth/Signup/Login -->
+      <line x1="130" y1="73" x2="212" y2="250" stroke="#00d4aa" stroke-width="1.3" marker-end="url(#a1g)" opacity="0.8"/>
+      <text x="138" y="158" fill="#a0b0c8" font-size="9">Signup/Login</text>
+
+      <line x1="120" y1="435" x2="210" y2="318" stroke="#00d4aa" stroke-width="1.3" marker-end="url(#a1g)" opacity="0.8"/>
+      <text x="108" y="384" fill="#a0b0c8" font-size="9">Signup/Login</text>
+
+      <line x1="1280" y1="73" x2="322" y2="268" stroke="#00d4aa" stroke-width="1.3" marker-end="url(#a1g)" opacity="0.8"/>
+      <text x="800" y="148" fill="#a0b0c8" font-size="9">Driver Signup/Login</text>
+
+      <!-- P1 ↔ Users -->
+      <line x1="222" y1="340" x2="160" y2="600" stroke="#ffd166" stroke-width="1.3" marker-end="url(#a1y)" opacity="0.8"/>
+      <text x="162" y="484" fill="#a0b0c8" font-size="9">Create user / check role</text>
+
+      <!-- P8 Admin Mgmt -->
+      <line x1="120" y1="219" x2="198" y2="215" stroke="#00d4aa" stroke-width="1.3" marker-end="url(#a1g)" opacity="0.8"/>
+      <text x="124" y="213" fill="#a0b0c8" font-size="9">Admin actions</text>
+
+      <line x1="198" y1="186" x2="130" y2="73" stroke="#5b8cff" stroke-width="1.3" marker-end="url(#a1)" opacity="0.8"/>
+
+      <line x1="260" y1="262" x2="260" y2="138" stroke="#5b8cff" stroke-width="1.3" marker-end="url(#a1)" opacity="0.8"/>
+
+      <!-- P8 → Users -->
+      <line x1="220" y1="248" x2="155" y2="610" stroke="#ffd166" stroke-width="1.2" marker-end="url(#a1y)" stroke-dasharray="5,3" opacity="0.7"/>
+      <text x="146" y="438" fill="#a0b0c8" font-size="9">Manage users</text>
+
+      <!-- P8 → Loads -->
+      <line x1="304" y1="252" x2="512" y2="720" stroke="#ffd166" stroke-width="1.2" marker-end="url(#a1y)" stroke-dasharray="5,3" opacity="0.7"/>
+      <text x="340" y="494" fill="#a0b0c8" font-size="9">Manage shipments</text>
+
+      <!-- Shipper → P2: Add Load -->
+      <line x1="120" y1="450" x2="498" y2="524" stroke="#00d4aa" stroke-width="1.3" marker-end="url(#a1g)" opacity="0.8"/>
+      <text x="260" y="508" fill="#a0b0c8" font-size="9">Add load</text>
+
+      <!-- P2 → Loads -->
+      <line x1="560" y1="602" x2="560" y2="720" stroke="#ffd166" stroke-width="1.3" marker-end="url(#a1y)" opacity="0.8"/>
+      <text x="565" y="668" fill="#a0b0c8" font-size="9">Save load details</text>
+
+      <!-- P2 → Notifications -->
+      <line x1="610" y1="556" x2="772" y2="686" stroke="#ffd166" stroke-width="1.2" marker-end="url(#a1y)" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="668" y="614" fill="#a0b0c8" font-size="9">Notify marketplace</text>
+
+      <!-- Driver/Transporter → P3 -->
+      <line x1="1280" y1="88" x2="622" y2="310" stroke="#00d4aa" stroke-width="1.3" marker-end="url(#a1g)" opacity="0.8"/>
+      <text x="950" y="188" fill="#a0b0c8" font-size="9">Driver: Find/Accept load</text>
+
+      <line x1="130" y1="73" x2="498" y2="306" stroke="#00d4aa" stroke-width="1.3" marker-end="url(#a1g)" opacity="0.8"/>
+      <text x="226" y="170" fill="#a0b0c8" font-size="9">Transporter: Accept+Assign</text>
+
+      <!-- Shipper → P3: Confirm/Reject -->
+      <line x1="120" y1="440" x2="498" y2="346" stroke="#00d4aa" stroke-width="1.3" marker-end="url(#a1g)" opacity="0.8"/>
+      <text x="220" y="408" fill="#a0b0c8" font-size="9">Confirm/Reject driver</text>
+
+      <!-- P3 ↔ Loads -->
+      <line x1="542" y1="392" x2="542" y2="720" stroke="#ffd166" stroke-width="1.2" marker-end="url(#a1y)" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="546" y="564" fill="#a0b0c8" font-size="9">Check / update loads</text>
+
+      <!-- P3 ↔ Fleet -->
+      <line x1="540" y1="390" x2="510" y2="440" stroke="#ffd166" stroke-width="1.3" marker-end="url(#a1y)" opacity="0.8"/>
+      <text x="502" y="420" fill="#a0b0c8" font-size="9">Get drivers</text>
+
+      <!-- P3 → Notifications -->
+      <line x1="618" y1="358" x2="778" y2="684" stroke="#ffd166" stroke-width="1.2" marker-end="url(#a1y)" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="712" y="510" fill="#a0b0c8" font-size="9">Notify shipper/accepter</text>
+
+      <!-- Driver → P4 -->
+      <line x1="1280" y1="86" x2="982" y2="402" stroke="#00d4aa" stroke-width="1.3" marker-end="url(#a1g)" opacity="0.8"/>
+      <text x="1128" y="228" fill="#a0b0c8" font-size="9">Order shipped / Enter OTP</text>
+
+      <!-- P4 ↔ Loads -->
+      <line x1="882" y1="476" x2="640" y2="720" stroke="#ffd166" stroke-width="1.3" marker-end="url(#a1y)" opacity="0.8"/>
+      <text x="716" y="616" fill="#a0b0c8" font-size="9">Generate OTP</text>
+
+      <!-- P4 → Notifications (OTP to shipper) -->
+      <line x1="922" y1="482" x2="854" y2="682" stroke="#ffd166" stroke-width="1.2" marker-end="url(#a1y)" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="880" y="590" fill="#a0b0c8" font-size="9">Send OTP</text>
+
+      <!-- P4 → P5 (OTP matched) -->
+      <line x1="982" y1="420" x2="1098" y2="420" stroke="#5b8cff" stroke-width="1.5" marker-end="url(#a1)" opacity="0.9"/>
+      <text x="1024" y="414" fill="#a0b0c8" font-size="9">OTP matched</text>
+
+      <!-- P5 → Loads: payment released -->
+      <line x1="1140" y1="480" x2="680" y2="722" stroke="#ffd166" stroke-width="1.2" marker-end="url(#a1y)" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="938" y="622" fill="#a0b0c8" font-size="9">Mark payment released</text>
+
+      <!-- P5 → Shipper/Driver payment history -->
+      <line x1="1160" y1="482" x2="120" y2="460" stroke="#5b8cff" stroke-width="1.2" marker-end="url(#a1)" stroke-dasharray="4,3" opacity="0.6"/>
+      <text x="540" y="478" fill="#a0b0c8" font-size="9">Payment history → Shipper</text>
+
+      <line x1="1222" y1="400" x2="1280" y2="92" stroke="#5b8cff" stroke-width="1.2" marker-end="url(#a1)" stroke-dasharray="4,3" opacity="0.6"/>
+      <text x="1238" y="244" fill="#a0b0c8" font-size="9">Payment → Driver</text>
+
+      <!-- P5 → Notifications -->
+      <line x1="1140" y1="478" x2="912" y2="682" stroke="#ffd166" stroke-width="1.2" marker-end="url(#a1y)" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="1014" y="596" fill="#a0b0c8" font-size="9">Notify payment</text>
+
+      <!-- Reviews P6 ↔ Users/Reviews -->
+      <line x1="870" y1="620" x2="190" y2="622" stroke="#ffd166" stroke-width="1.2" marker-end="url(#a1y)" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="500" y="616" fill="#a0b0c8" font-size="9">Profile &amp; ratings</text>
+
+      <line x1="890" y1="680" x2="890" y2="750" stroke="#ffd166" stroke-width="1.3" marker-end="url(#a1y)" opacity="0.8"/>
+      <text x="894" y="720" fill="#a0b0c8" font-size="9">Save reviews</text>
+
+      <!-- Actor → P6 Reviews -->
+      <line x1="120" y1="452" x2="860" y2="610" stroke="#00d4aa" stroke-width="1.2" marker-end="url(#a1g)" stroke-dasharray="5,3" opacity="0.7"/>
+      <text x="434" y="556" fill="#a0b0c8" font-size="9">Review driver/transporter</text>
+
+      <line x1="1280" y1="90" x2="982" y2="594" stroke="#00d4aa" stroke-width="1.2" marker-end="url(#a1g)" stroke-dasharray="5,3" opacity="0.7"/>
+      <text x="1178" y="366" fill="#a0b0c8" font-size="9">Driver reviews shipper</text>
+
+      <!-- Support P7 -->
+      <line x1="120" y1="456" x2="638" y2="826" stroke="#00d4aa" stroke-width="1.2" marker-end="url(#a1g)" stroke-dasharray="5,3" opacity="0.7"/>
+      <text x="302" y="660" fill="#a0b0c8" font-size="9">Ask question</text>
+
+      <line x1="1280" y1="92" x2="762" y2="830" stroke="#00d4aa" stroke-width="1.2" marker-end="url(#a1g)" stroke-dasharray="5,3" opacity="0.7"/>
+      <text x="1080" y="504" fill="#a0b0c8" font-size="9">Ask question</text>
+
+      <line x1="130" y1="226" x2="640" y2="840" stroke="#00d4aa" stroke-width="1.2" marker-end="url(#a1g)" stroke-dasharray="5,3" opacity="0.7"/>
+
+      <!-- Admin → P7: Answer -->
+      <line x1="120" y1="230" x2="640" y2="836" stroke="#5b8cff" stroke-width="1.2" marker-end="url(#a1)" stroke-dasharray="5,3" opacity="0.6"/>
+      <text x="280" y="556" fill="#a0b0c8" font-size="9">Admin answers ticket</text>
+
+      <!-- P7 → Support Tickets -->
+      <line x1="762" y1="840" x2="912" y2="838" stroke="#ffd166" stroke-width="1.3" marker-end="url(#a1y)" opacity="0.8"/>
+      <text x="792" y="832" fill="#a0b0c8" font-size="9">Save ticket</text>
+
+      <!-- P7 → Notifications (notify user) -->
+      <line x1="744" y1="790" x2="820" y2="712" stroke="#ffd166" stroke-width="1.2" marker-end="url(#a1y)" opacity="0.8"/>
+      <text x="752" y="756" fill="#a0b0c8" font-size="9">Notify user</text>
+
+      <!-- P8 → Notifications (view) -->
+      <line x1="308" y1="238" x2="762" y2="688" stroke="#ffd166" stroke-width="1.2" marker-end="url(#a1y)" stroke-dasharray="5,3" opacity="0.6"/>
+      <text x="502" y="476" fill="#a0b0c8" font-size="9">View notifications</text>
+
+    </svg>
+  </div>
+</div>
+
+<!-- ══════════════════ DATA STORES ══════════════════ -->
+<div id="ds" class="section">
+  <div class="section-title">Data Stores</div>
+  <div class="section-subtitle">SQLite Database — Table Descriptions</div>
+  <div class="ds-grid">
+    <div class="ds-card">
+      <div class="ds-name">D1 · Users Table</div>
+      <div class="ds-desc">Stores user details, role, email, password hash, profile picture, and bio. One role per email enforced.</div>
+    </div>
+    <div class="ds-card">
+      <div class="ds-name">D2 · Loads Table</div>
+      <div class="ds-desc">Stores load details, pickup, destination, price, status, OTP, and accepted driver/transporter references.</div>
+    </div>
+    <div class="ds-card">
+      <div class="ds-name">D3 · Transporter Drivers Table</div>
+      <div class="ds-desc">Stores which drivers belong to which transporter. Used during acceptance and assignment (P3).</div>
+    </div>
+    <div class="ds-card">
+      <div class="ds-name">D4 · Notifications Table</div>
+      <div class="ds-desc">Stores system updates for all users and the admin. Generated by load, delivery, payment, and support events.</div>
+    </div>
+    <div class="ds-card">
+      <div class="ds-name">D5 · Reviews Table</div>
+      <div class="ds-desc">Stores ratings and written comments after completed shipments. Linked to user profiles.</div>
+    </div>
+    <div class="ds-card">
+      <div class="ds-name">D6 · Support Tickets Table</div>
+      <div class="ds-desc">Stores customer questions submitted by Shippers, Drivers, and Transporters, along with Admin responses.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function show(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function downloadSVG() {
+    const activeSection = document.querySelector('.section.active');
+    const svg = activeSection.querySelector('svg');
+    if (!svg) { alert('No diagram on this tab.'); return; }
+
+    const clone = svg.cloneNode(true);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+    // Embed dark background for standalone SVG
+    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bg.setAttribute('width', '100%');
+    bg.setAttribute('height', '100%');
+    bg.setAttribute('fill', '#0a0c10');
+    clone.insertBefore(bg, clone.firstChild);
+
+    // Inline font
+    const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    style.textContent = `@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap'); text { font-family: Sora, sans-serif; }`;
+    clone.insertBefore(style, clone.firstChild);
+
+    const blob = new Blob([clone.outerHTML], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const tab = activeSection.id === 'l0' ? 'Level0_Context' : 'Level1_Detailed';
+    a.href = url;
+    a.download = `Vahak_DFD_${tab}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
+</body>
+</html>
