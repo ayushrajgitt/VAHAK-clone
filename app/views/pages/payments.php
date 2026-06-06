@@ -11,7 +11,7 @@
         $payments->execute([$u['id'], $u['id']]);
     }
     foreach ($payments as $pay): ?>
-        <article class="load"><h3>#<?= h($pay['id']) ?> <?= h($pay['title']) ?></h3><p><?= h($pay['pickup']) ?> to <?= h($pay['destination']) ?></p><p><strong>Rs <?= h($pay['price']) ?></strong> | <?= $pay['status'] === 'paid' ? 'Released' : 'On hold' ?></p><div class="actions"><a class="button secondary" href="?page=payment&id=<?= h($pay['id']) ?>">Open payment</a><?php render_review_prompt($pay, $u); ?></div></article>
+        <article class="load"><h3>#<?= h($pay['id']) ?> <?= h($pay['title']) ?></h3><p><?= h($pay['pickup']) ?> to <?= h($pay['destination']) ?></p><p><strong>Rs <?= h($pay['price']) ?></strong> | <span class="status-pill <?= h(payment_status_class($pay['status'])) ?>"><?= h(payment_status_label($pay['status'])) ?></span></p><div class="actions"><a class="button secondary" href="?page=payment&id=<?= h($pay['id']) ?>">Open payment</a><?php render_review_prompt($pay, $u); ?></div></article>
     <?php endforeach; ?>
     </div>
 </section>
