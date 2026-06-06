@@ -99,3 +99,23 @@ function render_review_prompt(array $load, array $user): void
         echo '<a class="button secondary" href="?page=review&id=' . h($load['id']) . '">Review this shipment</a>';
     }
 }
+
+function payment_status_label(?string $status): string
+{
+    return match (trim((string)$status)) {
+        'paid' => 'Payment released',
+        'otp_sent' => 'Waiting for OTP confirmation',
+        'ready_to_deliver' => 'Payment on hold',
+        default => 'Payment not started',
+    };
+}
+
+function payment_status_class(?string $status): string
+{
+    return match (trim((string)$status)) {
+        'paid' => 'status-paid',
+        'otp_sent' => 'status-waiting',
+        'ready_to_deliver' => 'status-hold',
+        default => 'status-open',
+    };
+}

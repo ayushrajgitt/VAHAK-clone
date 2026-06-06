@@ -312,6 +312,31 @@ textarea { min-height: 96px; resize: vertical; }
     font-size: 24px;
     font-weight: 900;
 }
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+}
+.status-paid {
+    background: #dcfce7;
+    color: #166534;
+}
+.status-waiting {
+    background: #fef3c7;
+    color: #92400e;
+}
+.status-hold {
+    background: #fee2e2;
+    color: #991b1b;
+}
+.status-open {
+    background: #e5e7eb;
+    color: #374151;
+}
 .flash { margin-bottom: 18px; border-color: #f0c36d; background: #fff8ea; }
 
 @media (max-width: 760px) {
